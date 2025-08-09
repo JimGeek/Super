@@ -264,9 +264,161 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 # Spectacular Settings (API Docs)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'SUPER Platform API',
-    'DESCRIPTION': 'India Local Commerce Platform',
+    'DESCRIPTION': '''
+    # SUPER - India Local Commerce Platform API
+    
+    A comprehensive local commerce platform API designed to revolutionize local commerce in India by connecting consumers, merchants, and delivery partners through advanced automation flows, real-time logistics, and integrated payment systems.
+    
+    ## Key Features
+    
+    ### 🚀 Core Platform
+    - **Multi-tenant SaaS Architecture**: Organization-based data isolation
+    - **Advanced Flow Designer**: Visual automation with 8 node types
+    - **Real-time Processing**: WebSocket support for live updates
+    - **Comprehensive Analytics**: Multi-dimensional data insights
+    
+    ### 💳 Payment & Financial
+    - **UPI Integration**: Multi-provider support (Razorpay, PhonePe, Paytm)
+    - **Settlement Engine**: Automated daily settlements with merchant payouts
+    - **Refund Management**: Automated and manual refund processing
+    - **Transaction Analytics**: Comprehensive financial reporting
+    
+    ### 🚚 Logistics & Delivery
+    - **OSRM Integration**: Real-time route optimization and ETA calculation
+    - **Smart Dispatch**: Automated rider assignment with zone-based routing
+    - **Multi-provider Support**: Porter API integration for delivery services
+    - **Real-time Tracking**: Live delivery tracking with WebSocket updates
+    
+    ### 🎯 Advertising Platform
+    - **Real-time Bidding**: Second-price auction system with fraud detection
+    - **Campaign Management**: 6 bidding strategies with performance optimization
+    - **Advanced Targeting**: Geographic, demographic, behavioral targeting
+    - **Performance Analytics**: CTR, CPC, CPA, ROAS tracking
+    
+    ### 🏆 Rewards & Loyalty
+    - **SuperCash System**: Points earning, redemption, and expiry handling
+    - **Campaign Engine**: Flexible rewards campaigns with targeting
+    - **Referral Programs**: Multi-tier referral rewards system
+    - **Analytics Dashboard**: Rewards performance metrics
+    
+    ## Authentication
+    
+    The API uses JWT (JSON Web Token) authentication. Include the token in the Authorization header:
+    
+    ```
+    Authorization: Bearer <your_jwt_token>
+    ```
+    
+    ## Rate Limiting
+    
+    API requests are rate-limited per user. Current limits:
+    - Default: 100 requests per hour per user
+    - Tracking endpoints: Higher limits for real-time operations
+    
+    ## Response Format
+    
+    All API responses follow a consistent format:
+    
+    ```json
+    {
+        "status": "success|error",
+        "data": {...},
+        "message": "Optional message",
+        "pagination": {...} // For paginated responses
+    }
+    ```
+    
+    ## Error Handling
+    
+    The API returns appropriate HTTP status codes:
+    - 200: Success
+    - 201: Created
+    - 400: Bad Request
+    - 401: Unauthorized
+    - 403: Forbidden
+    - 404: Not Found
+    - 429: Rate Limited
+    - 500: Internal Server Error
+    ''',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        'name': 'SUPER Platform Team',
+        'email': 'jimit@outlook.com',
+        'url': 'https://github.com/JimGeek/Super',
+    },
+    'LICENSE': {
+        'name': 'Private',
+    },
+    'SERVERS': [
+        {
+            'url': 'http://localhost:8000/api/v1',
+            'description': 'Development Server'
+        },
+        {
+            'url': 'https://api.super.com/api/v1',
+            'description': 'Production Server'
+        }
+    ],
+    'TAGS': [
+        {
+            'name': 'Authentication',
+            'description': 'User authentication and authorization'
+        },
+        {
+            'name': 'Organizations',
+            'description': 'Multi-tenant organization management'
+        },
+        {
+            'name': 'Flows',
+            'description': 'Visual automation flow designer and execution'
+        },
+        {
+            'name': 'Catalog',
+            'description': 'Product catalog and inventory management'
+        },
+        {
+            'name': 'Orders',
+            'description': 'Order management and fulfillment'
+        },
+        {
+            'name': 'Payments',
+            'description': 'UPI payments and transaction management'
+        },
+        {
+            'name': 'Settlements',
+            'description': 'Automated settlement and payout processing'
+        },
+        {
+            'name': 'Logistics',
+            'description': 'Delivery management and route optimization'
+        },
+        {
+            'name': 'Rewards',
+            'description': 'SuperCash rewards and loyalty programs'
+        },
+        {
+            'name': 'Advertising',
+            'description': 'Ad campaigns and real-time bidding platform'
+        },
+        {
+            'name': 'Analytics',
+            'description': 'Business intelligence and reporting'
+        },
+        {
+            'name': 'Notifications',
+            'description': 'Push notifications and messaging'
+        }
+    ],
+    'EXTERNAL_DOCS': {
+        'description': 'GitHub Repository',
+        'url': 'https://github.com/JimGeek/Super'
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATION_PARAMETERS': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SCHEMA_PATH_PREFIX': '/api/v1',
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
 }
 
 # Platform Settings
