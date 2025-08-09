@@ -1,0 +1,71 @@
+# Django Core
+Django==5.0.6
+djangorestframework==3.15.1
+django-cors-headers==4.3.1
+django-environ==0.11.2
+djangorestframework-simplejwt==5.3.0
+django-extensions==3.2.3
+django-debug-toolbar==4.2.0
+
+# Database
+psycopg2-binary==2.9.7
+django-contrib-postgres==0.0.1
+
+# Spatial/GIS
+GeoDjango==0.0.1
+django-leaflet==0.30.0
+geopy==2.4.0
+
+# Async & WebSockets
+channels==4.0.0
+channels-redis==4.1.0
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+flower==2.0.1
+
+# Storage & Media
+django-storages==1.14.2
+boto3==1.28.62
+Pillow==10.0.1
+
+# API Documentation
+drf-spectacular==0.26.5
+drf-spectacular[sidecar]==0.26.5
+
+# Authentication & Security
+django-ratelimit==4.1.0
+cryptography==41.0.7
+PyJWT==2.8.0
+
+# Utilities
+requests==2.31.0
+python-decouple==3.8
+phonenumbers==8.13.25
+python-dateutil==2.8.2
+
+# PDF Generation
+WeasyPrint==60.1
+reportlab==4.0.4
+
+# Validation
+jsonschema==4.19.2
+marshmallow==3.20.1
+
+# Monitoring & Logging
+sentry-sdk==1.38.0
+django-health-check==3.17.0
+
+# Development
+black==23.9.1
+flake8==6.1.0
+isort==5.12.0
+pytest==7.4.3
+pytest-django==4.6.0
+factory-boy==3.3.0
+coverage==7.3.2
+
+# Production
+gunicorn==21.2.0
+whitenoise==6.6.0

@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    environment:
+      POSTGRES_DB: super_db
+      POSTGRES_USER: super_user
+      POSTGRES_PASSWORD: super_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U super_user -d super_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # MinIO (S3 compatible storage)
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  # OSRM (Routing engine)
+  osrm:
+    image: osrm/osrm-backend:v5.27.1
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ops/osrm-data:/data
+    command: osrm-routed --algorithm mld /data/india-latest.osrm
+    depends_on:
+      - osrm-setup
+
+  osrm-setup:
+    image: osrm/osrm-backend:v5.27.1
+    volumes:
+      - ./ops/osrm-data:/data
+    command: |
+      sh -c "
+        if [ ! -f /data/india-latest.osrm ]; then
+          echo 'Downloading India OSM data...'
+          wget -O /data/india-latest.osm.pbf https://download.geofabrik.de/asia/india-latest.osm.pbf
+          osrm-extract -p /opt/car.lua /data/india-latest.osm.pbf
+          osrm-partition /data/india-latest.osrm
+          osrm-customize /data/india-latest.osrm
+        fi
+      "
+
+  # Django Backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgres://super_user:super_password@postgres:5432/super_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+      - OSRM_URL=http://osrm:5000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - media_files:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    command: |
+      sh -c "
+        python manage.py migrate
+        python manage.py collectstatic --noinput
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  # Celery Worker
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgres://super_user:super_password@postgres:5432/super_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A super_core worker -l info
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgres://super_user:super_password@postgres:5432/super_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A super_core beat -l info
+
+  # Admin Web
+  admin-web:
+    build:
+      context: ./admin-web
+      dockerfile: Dockerfile.dev
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./admin-web:/app
+      - /app/node_modules
+
+  # Merchant Web
+  merchant-web:
+    build:
+      context: ./merchant-web
+      dockerfile: Dockerfile.dev
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./merchant-web:/app
+      - /app/node_modules
+
+  # Mid Admin Web
+  midadmin-web:
+    build:
+      context: ./midadmin-web
+      dockerfile: Dockerfile.dev
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./midadmin-web:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  media_files:
